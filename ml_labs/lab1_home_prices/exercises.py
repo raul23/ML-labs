@@ -19,6 +19,7 @@ iowa_file_path = os.path.expanduser('~/Data/kaggle_datasets/iowa_house_prices/tr
 
 # Exercises 2 and 3: Basic Data Exploration and Your First Machine Learning Model
 def ex_2_and_3():
+    # Load data
     home_data = pd.read_csv(iowa_file_path)
 
     # Print the list of columns in the dataset to find the name of the prediction target
@@ -67,9 +68,10 @@ def ex_2_and_3():
 
 # Exercise 4: Model Validation
 def ex_4():
-    # --------------------------------------------------------------------
-    # Set up your coding environment where the previous exercise left off.
-    # --------------------------------------------------------------------
+    # -------------------------------------------------------------------
+    # Set up your coding environment where the previous exercise left off
+    # -------------------------------------------------------------------
+    # Load data
     home_data = pd.read_csv(iowa_file_path)
     y = home_data.SalePrice
     feature_columns = ['LotArea', 'YearBuilt', '1stFlrSF', '2ndFlrSF', 'FullBath', 'BedroomAbvGr', 'TotRmsAbvGrd']
@@ -115,6 +117,64 @@ def ex_4():
     print_(val_mae)
 
 
+# Exercise 5: Underfitting and Overfitting
+def ex_5():
+    # ---------------------------------------------------------------
+    # Set up your coding environment where the previous step left off
+    # ---------------------------------------------------------------
+    # Load data
+    home_data = pd.read_csv(iowa_file_path)
+    # Create target object and call it y
+    y = home_data.SalePrice
+    # Create X
+    features = ['LotArea', 'YearBuilt', '1stFlrSF', '2ndFlrSF', 'FullBath', 'BedroomAbvGr', 'TotRmsAbvGrd']
+    X = home_data[features]
+
+    # Split into validation and training data
+    train_X, val_X, train_y, val_y = train_test_split(X, y, random_state=1)
+
+    # Specify Model
+    iowa_model = DecisionTreeRegressor(random_state=1)
+    # Fit Model
+    iowa_model.fit(train_X, train_y)
+
+    # Make validation predictions and calculate mean absolute error
+    val_predictions = iowa_model.predict(val_X)
+    val_mae = mean_absolute_error(val_predictions, val_y)
+    print("Validation MAE: {:,.0f}".format(val_mae), end="\n\n")
+
+    # -----------------
+    # Start of exercise
+    # -----------------
+    # Step 1: Compare Different Tree Sizes
+    import numpy
+    from tutorials import get_mae
+
+    candidate_max_leaf_nodes = [5, 25, 50, 100, 250, 500]
+    # Write loop to find the ideal tree size from candidate_max_leaf_nodes
+    best_mae = numpy.inf
+    best_max_leaf_nodes = None
+    for max_leaf_nodes in candidate_max_leaf_nodes:
+        my_mae = get_mae(max_leaf_nodes, train_X, val_X, train_y, val_y)
+        if my_mae < best_mae:
+            best_mae = my_mae
+            best_max_leaf_nodes = max_leaf_nodes
+        print("Max leaf nodes: %d  \t\t Mean Absolute Error:  %d" % (max_leaf_nodes, my_mae))
+
+    # Store the best value of max_leaf_nodes
+    best_tree_size = best_max_leaf_nodes
+    print("\nBest tree size is: ", best_tree_size, end="\n\n")
+
+    # Step 2: Fit Model Using All Data
+    # You don't need to hold out the validation data now that you've made all
+    # your modeling decisions
+    final_model = DecisionTreeRegressor(max_leaf_nodes=best_tree_size)
+
+    # fit the final model and uncomment the next two lines
+    final_model.fit(X, y)
+
+
 if __name__ == '__main__':
     # ex_2_and_3()
-    ex_4()
+    # ex_4()
+    ex_5()
