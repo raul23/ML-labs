@@ -7,6 +7,7 @@ import os
 
 import ipdb
 import pandas as pd
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
@@ -132,7 +133,36 @@ def lesson_5():
         print("Max leaf nodes: %d  \t\t Mean Absolute Error:  %d" % (max_leaf_nodes, my_mae))
 
 
+# Lesson 6: Random Forests
+def lesson_6():
+    # -------------------------
+    # Code from previous lesson
+    # -------------------------
+    # Load data
+    melbourne_data = pd.read_csv(melbourne_file_path)
+    # Filter rows with missing price values
+    filtered_melbourne_data = melbourne_data.dropna(axis=0)
+    # Choose target and features
+    y = filtered_melbourne_data.Price
+    melbourne_features = ['Rooms', 'Bathroom', 'Landsize', 'BuildingArea',
+                          'YearBuilt', 'Lattitude', 'Longtitude']
+    X = filtered_melbourne_data[melbourne_features]
+    # Split data into training and validation data,
+    train_X, val_X, train_y, val_y = train_test_split(X, y, random_state=0)
+
+    # -----------------
+    # Start of tutorial
+    # -----------------
+    # Build a random forest model
+    forest_model = RandomForestRegressor(random_state=1)
+    forest_model.fit(train_X, train_y)
+    melb_preds = forest_model.predict(val_X)
+    print_("MAE for a Random Forest", 0)
+    print_(mean_absolute_error(val_y, melb_preds))
+
+
 if __name__ == '__main__':
     # lessons_1_to_3()
     # lesson_4()
-    lesson_5()
+    # lesson_5()
+    lesson_6()
