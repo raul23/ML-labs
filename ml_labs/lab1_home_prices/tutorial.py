@@ -1,4 +1,8 @@
-# Ref.: Kaggle - Intro to ML
+"""Kaggle - Intro to Machine Learning (Tutorial)
+
+The Melbourne Housing Snapshot dataset can be downloaded from
+https://www.kaggle.com/glovepm/melbourne-housing
+"""
 import os
 
 import ipdb
