@@ -5,12 +5,7 @@ import ipdb
 import pandas as pd
 from sklearn.tree import DecisionTreeRegressor
 
-
-def print_(msg, is_data=1):
-    if is_data:
-        print(msg, end="\n\n")
-    else:
-        print("*** {} ***".format(msg))
+from ml_labs.utils.genutils import print_
 
 
 # Load Melbourne Housing Snapshot dataset
