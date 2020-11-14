@@ -1,39 +1,55 @@
 # Ref.: Kaggle - Intro to ML
 import os
-import pandas as pd
+
 import ipdb
+import pandas as pd
+from sklearn.tree import DecisionTreeRegressor
 
 
-def print_(msg):
-    print("*** {} ***".format(msg))
+def print_(msg, is_data=1):
+    if is_data:
+        print(msg, end="\n\n")
+    else:
+        print("*** {} ***".format(msg))
 
 
 # Load Melbourne Housing Snapshot dataset
 melbourne_file_path = os.path.expanduser('~/Data/kaggle_datasets/melbourne_housing_snapshot/melb_data.csv')
 melbourne_data = pd.read_csv(melbourne_file_path)
 # Print a summary of the data in Melbourne data
-print_("Summary of dataset")
-print(melbourne_data.describe(), end="\n\n")
+print_("Summary of dataset", 0)
+print_(melbourne_data.describe())
 
 # List of all columns in the dataset
-print_("Columns")
-print(melbourne_data.columns, end="\n\n")
+print_("Columns", 0)
+print_(melbourne_data.columns)
 
 # Drop missing values
 melbourne_data = melbourne_data.dropna(axis=0)
 
 # Select the prediction target (price)
 y = melbourne_data.Price
-print_("y")
-print(y, end="\n\n")
+print_("y", 0)
+print_(y)
 
 # Select features
 melbourne_features = ['Rooms', 'Bathroom', 'Landsize', 'Lattitude', 'Longtitude']
 X = melbourne_data[melbourne_features]
-print_("X")
-print(X, end="\n\n")
+print_("X", 0)
+print_(X)
 
-print_("Summary of X")
-print(X.describe(), end="\n\n")
-print_("First few rows of X")
-print(X.head(), end="\n\n")
+print_("Summary of X", 0)
+print_(X.describe())
+print_("First few rows of X", 0)
+print_(X.head())
+
+# Define model. Specify a number for random_state to ensure same results each run
+melbourne_model = DecisionTreeRegressor(random_state=1)
+
+# Fit model
+melbourne_model.fit(X, y)
+
+print_("Making predictions for the following 5 houses:", 0)
+print_(X.head())
+print_("The predictions are", 0)
+print_(melbourne_model.predict(X.head()))
