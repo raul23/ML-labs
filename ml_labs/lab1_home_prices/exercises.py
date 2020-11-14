@@ -7,6 +7,7 @@ import os
 
 import ipdb
 import pandas as pd
+from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeRegressor
@@ -174,7 +175,58 @@ def ex_5():
     final_model.fit(X, y)
 
 
+# Exercise 6: Random Forests
+def ex_6():
+    # --------------------------
+    # Code you've written so far
+    # --------------------------
+    # Load data
+    home_data = pd.read_csv(iowa_file_path)
+    # Create target object and call it y
+    y = home_data.SalePrice
+    # Create X
+    features = ['LotArea', 'YearBuilt', '1stFlrSF', '2ndFlrSF', 'FullBath', 'BedroomAbvGr', 'TotRmsAbvGrd']
+    X = home_data[features]
+
+    # Split into validation and training data
+    train_X, val_X, train_y, val_y = train_test_split(X, y, random_state=1)
+
+    # Specify Model
+    iowa_model = DecisionTreeRegressor(random_state=1)
+    # Fit Model
+    iowa_model.fit(train_X, train_y)
+
+    # Make validation predictions and calculate mean absolute error
+    val_predictions = iowa_model.predict(val_X)
+    val_mae = mean_absolute_error(val_predictions, val_y)
+    print("Validation MAE when not specifying max_leaf_nodes: {:,.0f}".format(val_mae))
+
+    # Using best value for max_leaf_nodes
+    iowa_model = DecisionTreeRegressor(max_leaf_nodes=100, random_state=1)
+    iowa_model.fit(train_X, train_y)
+    val_predictions = iowa_model.predict(val_X)
+    val_mae = mean_absolute_error(val_predictions, val_y)
+    print("Validation MAE for best value of max_leaf_nodes: {:,.0f}".format(val_mae), end="\n\n")
+
+    # -----------------
+    # Start of exercise
+    # -----------------
+    # Step 1: Use a Random Forest
+    # Define the model. Set random_state to 1
+    rf_model = RandomForestRegressor(random_state=1)
+
+    # Fit your model
+    rf_model.fit(train_X, train_y)
+
+    # Calculate the mean absolute error of your Random Forest model on the validation data
+    val_predictions = rf_model.predict(val_X)
+    rf_val_mae = mean_absolute_error(val_y, val_predictions)
+
+    print("Validation MAE for Random Forest Model: {}".format(rf_val_mae), end="\n\n")
+
+
 if __name__ == '__main__':
     # ex_2_and_3()
     # ex_4()
-    ex_5()
+    # ex_5()
+    ex_6()
