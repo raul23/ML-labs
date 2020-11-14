@@ -16,6 +16,15 @@ from ml_labs.utils.genutils import print_
 melbourne_file_path = os.path.expanduser('~/Data/kaggle_datasets/melbourne_housing_snapshot/melb_data.csv')
 
 
+# A utility function to help compare MAE scores from different values for max_leaf_nodes
+def get_mae(max_leaf_nodes, train_X, val_X, train_y, val_y):
+    model = DecisionTreeRegressor(max_leaf_nodes=max_leaf_nodes, random_state=0)
+    model.fit(train_X, train_y)
+    preds_val = model.predict(val_X)
+    mae = mean_absolute_error(val_y, preds_val)
+    return mae
+
+
 def lessons_1_to_3():
     # Load Melbourne Housing Snapshot dataset
     melbourne_data = pd.read_csv(melbourne_file_path)
@@ -97,6 +106,33 @@ def lesson_4():
     print_(mean_absolute_error(val_y, val_predictions))
 
 
+# Lesson 5: Underfitting and Overfitting
+def lesson_5():
+    # -------------------------
+    # Code from previous lesson
+    # -------------------------
+    # Load data
+    melbourne_data = pd.read_csv(melbourne_file_path)
+    # Filter rows with missing price values
+    filtered_melbourne_data = melbourne_data.dropna(axis=0)
+    # Choose target and features
+    y = filtered_melbourne_data.Price
+    melbourne_features = ['Rooms', 'Bathroom', 'Landsize', 'BuildingArea',
+                          'YearBuilt', 'Lattitude', 'Longtitude']
+    X = filtered_melbourne_data[melbourne_features]
+    # Split data into training and validation data,
+    train_X, val_X, train_y, val_y = train_test_split(X, y, random_state=0)
+
+    # -----------------
+    # Start of tutorial
+    # -----------------
+    # Compare MAE with differing values of max_leaf_nodes
+    for max_leaf_nodes in [5, 50, 500, 5000]:
+        my_mae = get_mae(max_leaf_nodes, train_X, val_X, train_y, val_y)
+        print("Max leaf nodes: %d  \t\t Mean Absolute Error:  %d" % (max_leaf_nodes, my_mae))
+
+
 if __name__ == '__main__':
     # lessons_1_to_3()
-    lesson_4()
+    # lesson_4()
+    lesson_5()
