@@ -7,10 +7,12 @@ import os
 
 import ipdb
 import pandas as pd
+from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 from ml_labs.utils.genutils import print_
@@ -26,7 +28,21 @@ def score_model(model, X_t, X_v, y_t, y_v):
     return mean_absolute_error(y_v, preds)
 
 
-def load_data():
+def load_data_for_lesson_2(features=None):
+    # Load data
+    melbourne_data = pd.read_csv(melbourne_file_path)
+    # Choose target and features
+    y = melbourne_data.Price
+    if features:
+        X = melbourne_data[features]
+    else:
+        X = melbourne_data
+    # Split data into training and validation data,
+    # X_train, X_valid, y_train, y_valid = train_test_split(X, y, random_state=0)
+    return train_test_split(X, y, random_state=0)
+
+
+def load_data_for_lesson_3():
     # Read the data
     data = pd.read_csv(melbourne_file_path)
 
@@ -40,6 +56,13 @@ def load_data():
 
     # Drop columns with missing values (simplest approach)
     cols_with_missing = [col for col in X_train_full.columns if X_train_full[col].isnull().any()]
+    # TODO: to remove SettingWithCopyWarning
+    X_train_full_copy = X_train_full.copy()
+    X_valid_full_copy = X_valid_full.copy()
+    del X_train_full
+    del X_valid_full
+    X_train_full = X_train_full_copy
+    X_valid_full = X_valid_full_copy
     X_train_full.drop(cols_with_missing, axis=1, inplace=True)
     X_valid_full.drop(cols_with_missing, axis=1, inplace=True)
 
@@ -59,29 +82,44 @@ def load_data():
     return X_train, X_valid, y_train, y_valid
 
 
-def load_data_v2(features=None):
-    # Load data
-    melbourne_data = pd.read_csv(melbourne_file_path)
-    # Choose target and features
-    y = melbourne_data.Price
-    if features:
-        X = melbourne_data[features]
-    else:
-        X = melbourne_data
-    # Split data into training and validation data,
-    # X_train, X_valid, y_train, y_valid = train_test_split(X, y, random_state=0)
-    return train_test_split(X, y, random_state=0)
+def load_data_for_lesson_4():
+    # Read the data
+    data = pd.read_csv(melbourne_file_path)
+
+    # Separate target from predictors
+    y = data.Price
+    X = data.drop(['Price'], axis=1)
+
+    # Divide data into training and validation subsets
+    X_train_full, X_valid_full, y_train, y_valid = train_test_split(X, y, train_size=0.8, test_size=0.2,
+                                                                    random_state=0)
+
+    # "Cardinality" means the number of unique values in a column
+    # Select categorical columns with relatively low cardinality (convenient but arbitrary)
+    categorical_cols = [cname for cname in X_train_full.columns if X_train_full[cname].nunique() < 10 and
+                        X_train_full[cname].dtype == "object"]
+
+    # Select numerical columns
+    numerical_cols = [cname for cname in X_train_full.columns if X_train_full[cname].dtype in ['int64', 'float64']]
+
+    # Keep selected columns only
+    my_cols = categorical_cols + numerical_cols
+    X_train = X_train_full[my_cols].copy()
+    X_valid = X_valid_full[my_cols].copy()
+
+    return X_train, X_valid, y_train, y_valid, numerical_cols, categorical_cols
 
 
 # Lesson 2: Missing values
 def lesson_2():
+    print_("LESSON 2: Missing values", 0, 1)
     # ----------------------------------
     # Example: Melbourne Housing dataset
     # ----------------------------------
     # Load data
     features = ['Rooms', 'Bathroom', 'Landsize', 'BuildingArea',
                 'YearBuilt', 'Lattitude', 'Longtitude']
-    X_train, X_valid, y_train, y_valid = load_data_v2(features)
+    X_train, X_valid, y_train, y_valid = load_data_for_lesson_2(features)
 
     # Build a random forest model
     forest_model = RandomForestRegressor(random_state=1)
@@ -154,11 +192,9 @@ def lesson_2():
 
 # Lesson 3: Categorical Variables
 def lesson_3():
+    print_("LESSON 3: Categorical Variables", 0, 1)
     # Load data
-    features = ['Type', 'Method', 'Regionname', 'Rooms', 'Distance', 'Postcode',
-                'Bedroom2', 'Bathroom', 'Landsize', 'Lattitude', 'Longtitude',
-                'Propertycount']
-    X_train, X_valid, y_train, y_valid = load_data()
+    X_train, X_valid, y_train, y_valid = load_data_for_lesson_3()
 
     # -------
     # Example
@@ -226,6 +262,70 @@ def lesson_3():
     print_(score_dataset(OH_X_train, OH_X_valid, y_train, y_valid))
 
 
+# Lesson 4: Pipelines
+def lesson_4():
+    print_("LESSON 4: Pipelines", 0, 1)
+    # -------
+    # Example
+    # -------
+    X_train, X_valid, y_train, y_valid, numerical_cols, categorical_cols = load_data_for_lesson_4()
+
+    print_("First 5 rows from the train data", 0,)
+    print_(X_train.head())
+
+    # Build pipeline in 3 steps
+
+    # ----------------------------------
+    # Step 1: Define Preprocessing Steps
+    # ----------------------------------
+    # The code below:
+    #
+    # - imputes missing values in numerical data, and
+    # - imputes missing values and applies a one-hot encoding to categorical data.
+
+    # Preprocessing for numerical data
+    numerical_transformer = SimpleImputer(strategy='constant')
+
+    # Preprocessing for categorical data
+    categorical_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy='most_frequent')),
+        ('onehot', OneHotEncoder(handle_unknown='ignore'))
+    ])
+
+    # Bundle preprocessing for numerical and categorical data
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('num', numerical_transformer, numerical_cols),
+            ('cat', categorical_transformer, categorical_cols)
+        ])
+
+    # ------------------------
+    # Step 2: Define the Model
+    # ------------------------
+    model = RandomForestRegressor(n_estimators=100, random_state=0)
+
+    # ----------------------------------------
+    # Step 3: Create and Evaluate the Pipeline
+    # ----------------------------------------
+    # Define a pipeline that bundles the preprocessing and modeling steps
+
+    # Bundle preprocessing and modeling code in a pipeline
+    my_pipeline = Pipeline(steps=[('preprocessor', preprocessor),
+                                  ('model', model)
+                                  ])
+
+    # Preprocessing of training data, fit model
+    my_pipeline.fit(X_train, y_train)
+
+    # Preprocessing of validation data, get predictions
+    preds = my_pipeline.predict(X_valid)
+
+    # Evaluate the model
+    score = mean_absolute_error(y_valid, preds)
+    print('MAE:', score)
+
+
 if __name__ == '__main__':
     # lesson_2()
-    lesson_3()
+    # lesson_3()
+    lesson_4()
