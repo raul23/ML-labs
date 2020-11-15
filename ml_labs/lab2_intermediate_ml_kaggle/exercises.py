@@ -8,10 +8,12 @@ from pprint import pprint
 
 import ipdb
 import pandas as pd
+from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
+from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 from ml_labs.utils.genutils import print_
@@ -28,8 +30,43 @@ def score_dataset(X_train, X_valid, y_train, y_valid):
     return mean_absolute_error(y_valid, preds)
 
 
+def load_data_for_ex_4():
+    # Read the data
+    X_full = pd.read_csv(train_file_path, index_col='Id')
+    X_test_full = pd.read_csv(test_file_path, index_col='Id')
+
+    # Remove rows with missing target, separate target from predictors
+    X_full.dropna(axis=0, subset=['SalePrice'], inplace=True)
+    y = X_full.SalePrice
+    X_full.drop(['SalePrice'], axis=1, inplace=True)
+
+    # Break off validation set from training data
+    X_train_full, X_valid_full, y_train, y_valid = train_test_split(X_full, y,
+                                                                    train_size=0.8, test_size=0.2,
+                                                                    random_state=0)
+
+    # "Cardinality" means the number of unique values in a column
+    # Select categorical columns with relatively low cardinality (convenient but arbitrary)
+    categorical_cols = [cname for cname in X_train_full.columns if
+                        X_train_full[cname].nunique() < 10 and
+                        X_train_full[cname].dtype == "object"]
+
+    # Select numerical columns
+    numerical_cols = [cname for cname in X_train_full.columns if
+                      X_train_full[cname].dtype in ['int64', 'float64']]
+
+    # Keep selected columns only
+    my_cols = categorical_cols + numerical_cols
+    X_train = X_train_full[my_cols].copy()
+    X_valid = X_valid_full[my_cols].copy()
+    X_test = X_test_full[my_cols].copy()
+
+    return X_train, X_valid, y_train, y_valid, X_test, numerical_cols, categorical_cols
+
+
 # Exercise 1: Introduction
 def ex_1():
+    print_("Exercise 1: Introduction", 0, 1)
     # Read the data
     X_full = pd.read_csv(train_file_path, index_col='Id')
     X_test_full = pd.read_csv(test_file_path, index_col='Id')
@@ -91,6 +128,7 @@ def ex_1():
 
 # Exercise 2: Missing Values
 def ex_2():
+    print_("Exercise 2: Missing Values", 0, 1)
     # -----
     # Setup
     # -----
@@ -192,6 +230,7 @@ def ex_2():
 
 # Exercise 3: Categorical Variables
 def ex_3():
+    print_("Exercise 3: Categorical Variables", 0, 1)
     # -----
     # Setup
     # -----
@@ -308,7 +347,101 @@ def ex_3():
     print_(score_dataset(OH_X_train, OH_X_valid, y_train, y_valid))
 
 
+# Exercise 4: Pipelines
+def ex_4():
+    print_("Exercise 4: Pipelines", 0, 1)
+    X_train, X_valid, y_train, y_valid, X_test, numerical_cols, categorical_cols = load_data_for_ex_4()
+
+    print_("First 5 rows from train", 0)
+    print_(X_train.head())
+
+    # -------------------------------------
+    # Preprocess the data and train a model
+    # -------------------------------------
+    # Preprocessing for numerical data
+    numerical_transformer = SimpleImputer(strategy='constant')
+
+    # Preprocessing for categorical data
+    categorical_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy='most_frequent')),
+        ('onehot', OneHotEncoder(handle_unknown='ignore'))
+    ])
+
+    # Bundle preprocessing for numerical and categorical data
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('num', numerical_transformer, numerical_cols),
+            ('cat', categorical_transformer, categorical_cols)
+        ])
+
+    # Define model
+    model = RandomForestRegressor(n_estimators=100, random_state=0)
+
+    # Bundle preprocessing and modeling code in a pipeline
+    clf = Pipeline(steps=[('preprocessor', preprocessor),
+                          ('model', model)
+                          ])
+
+    # Preprocessing of training data, fit model
+    clf.fit(X_train, y_train)
+
+    # Preprocessing of validation data, get predictions
+    preds = clf.predict(X_valid)
+
+    print('MAE:', mean_absolute_error(y_valid, preds))
+
+    # -------------------------------
+    # Step 1: Improve the performance
+    # -------------------------------
+    # Part A
+    # Preprocessing for numerical data
+    numerical_transformer = SimpleImputer(strategy='median')
+
+    # Preprocessing for categorical data
+    categorical_transformer = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy='most_frequent')),
+        ('onehot', OneHotEncoder(handle_unknown='ignore'))
+    ])
+
+    # Bundle preprocessing for numerical and categorical data
+    preprocessor = ColumnTransformer(
+        transformers=[
+            ('num', numerical_transformer, numerical_cols),
+            ('cat', categorical_transformer, categorical_cols)
+        ])
+
+    model = RandomForestRegressor(n_estimators=100, random_state=0)
+
+    # Part B
+    # Bundle preprocessing and modeling code in a pipeline
+    my_pipeline = Pipeline(steps=[('preprocessor', preprocessor),
+                                  ('model', model)
+                                  ])
+
+    # Preprocessing of training data, fit model
+    my_pipeline.fit(X_train, y_train)
+
+    # Preprocessing of validation data, get predictions
+    preds = my_pipeline.predict(X_valid)
+
+    # Evaluate the model
+    score = mean_absolute_error(y_valid, preds)
+    print('\nMAE:', score)
+
+    # ---------------------------------
+    # Step 2: Generate test predictions
+    # ---------------------------------
+    # Preprocessing of test data, fit model
+    preds_test = my_pipeline.predict(X_test)
+
+    # Save test predictions to file
+    output = pd.DataFrame({'Id': X_test.index,
+                           'SalePrice': preds_test})
+    output.to_csv('ex4_submission.csv', index=False)
+
+
 if __name__ == '__main__':
     # ex_1()
     # ex_2()
-    ex_3()
+    # ex_3()
+    ex_4()
