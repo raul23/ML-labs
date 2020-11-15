@@ -7,12 +7,13 @@ import os
 from pprint import pprint
 
 import ipdb
+import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import mean_absolute_error
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
@@ -20,14 +21,6 @@ from ml_labs.utils.genutils import print_
 
 train_file_path = os.path.expanduser('~/Data/kaggle_datasets/home_data_for_ml_course/train.csv')
 test_file_path = os.path.expanduser('~/Data/kaggle_datasets/home_data_for_ml_course/test.csv')
-
-
-# Function for comparing different approaches
-def score_dataset(X_train, X_valid, y_train, y_valid):
-    model = RandomForestRegressor(n_estimators=100, random_state=0)
-    model.fit(X_train, y_train)
-    preds = model.predict(X_valid)
-    return mean_absolute_error(y_valid, preds)
 
 
 def load_data_for_ex_4():
@@ -62,6 +55,32 @@ def load_data_for_ex_4():
     X_test = X_test_full[my_cols].copy()
 
     return X_train, X_valid, y_train, y_valid, X_test, numerical_cols, categorical_cols
+
+
+def load_data_for_ex_5():
+    # Read the data
+    train_data = pd.read_csv(train_file_path, index_col='Id')
+    test_data = pd.read_csv(test_file_path, index_col='Id')
+
+    # Remove rows with missing target, separate target from predictors
+    train_data.dropna(axis=0, subset=['SalePrice'], inplace=True)
+    y = train_data.SalePrice
+    train_data.drop(['SalePrice'], axis=1, inplace=True)
+
+    # Select numeric columns only
+    numeric_cols = [cname for cname in train_data.columns if train_data[cname].dtype in ['int64', 'float64']]
+    X = train_data[numeric_cols].copy()
+    X_test = test_data[numeric_cols].copy()
+
+    return X, y, X_test
+
+
+# Function for comparing different approaches
+def score_dataset(X_train, X_valid, y_train, y_valid):
+    model = RandomForestRegressor(n_estimators=100, random_state=0)
+    model.fit(X_train, y_train)
+    preds = model.predict(X_valid)
+    return mean_absolute_error(y_valid, preds)
 
 
 # Exercise 1: Introduction
@@ -440,8 +459,64 @@ def ex_4():
     output.to_csv('ex4_submission.csv', index=False)
 
 
+# Exercise 5: Cross-validation
+def ex_5():
+    print_("Exercise 5: Cross-validation", 0, 1)
+    X, y, X_test = load_data_for_ex_5()
+
+    print_("First 5 rows from X", 0)
+    print_(X.head())
+
+    my_pipeline = Pipeline(steps=[
+        ('preprocessor', SimpleImputer()),
+        ('model', RandomForestRegressor(n_estimators=50, random_state=0))
+    ])
+
+    # Multiply by -1 since sklearn calculates *negative* MAE
+    scores = -1 * cross_val_score(my_pipeline, X, y,
+                                  cv=5,
+                                  scoring='neg_mean_absolute_error')
+
+    print("Average MAE score:", scores.mean())
+
+    # -------------------------------
+    # Step 1: Write a useful function
+    # -------------------------------
+    def get_score(n_estimators):
+        """Return the average MAE over 3 CV folds of random forest model.
+
+        Keyword argument:
+        n_estimators -- the number of trees in the forest
+        """
+        my_pipeline_ = Pipeline(steps=[
+            ('preprocessor', SimpleImputer()),
+            ('model', RandomForestRegressor(n_estimators=n_estimators, random_state=0))
+        ])
+        # Multiply by -1 since sklearn calculates *negative* MAE
+        scores = -1 * cross_val_score(my_pipeline_, X, y,
+                                      cv=3,
+                                      scoring='neg_mean_absolute_error')
+        # print("\nAverage MAE score (across experiments):")
+        # print(scores.mean(), end="\n\n")
+        return scores.mean()
+
+    # ---------------------------------------
+    # Step 2: Test different parameter values
+    # ---------------------------------------
+    results = dict([(i, get_score(i)) for i in range(50, 300, 50)])
+
+    plt.plot(list(results.keys()), list(results.values()))
+    plt.show()
+
+    # -------------------------------------
+    # Step 3: Find the best parameter value
+    # -------------------------------------
+
+
+
 if __name__ == '__main__':
     # ex_1()
     # ex_2()
     # ex_3()
-    ex_4()
+    # ex_4()
+    ex_5()
