@@ -11,7 +11,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import mean_absolute_error
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
@@ -108,6 +108,19 @@ def load_data_for_lesson_4():
     X_valid = X_valid_full[my_cols].copy()
 
     return X_train, X_valid, y_train, y_valid, numerical_cols, categorical_cols
+
+
+def load_data_for_lesson_5():
+    # Read the data
+    data = pd.read_csv(melbourne_file_path)
+
+    # Select subset of predictors
+    cols_to_use = ['Rooms', 'Distance', 'Landsize', 'BuildingArea', 'YearBuilt']
+    X = data[cols_to_use]
+
+    # Select target
+    y = data.Price
+    return X, y
 
 
 # Lesson 2: Missing values
@@ -325,7 +338,29 @@ def lesson_4():
     print('MAE:', score)
 
 
+# Lesson 5: Cross-Validation
+def lesson_5():
+    print_("LESSON 5: Cross-Validation", 0, 1)
+    X, y = load_data_for_lesson_5()
+
+    my_pipeline = Pipeline(steps=[('preprocessor', SimpleImputer()),
+                                  ('model', RandomForestRegressor(n_estimators=50,
+                                                                  random_state=0))
+                                  ])
+
+    # Multiply by -1 since sklearn calculates *negative* MAE
+    scores = -1 * cross_val_score(my_pipeline, X, y,
+                                  cv=5,
+                                  scoring='neg_mean_absolute_error')
+
+    print("MAE scores:\n", scores)
+
+    print("\nAverage MAE score (across experiments):")
+    print(scores.mean(), end="\n\n")
+
+
 if __name__ == '__main__':
     # lesson_2()
     # lesson_3()
-    lesson_4()
+    # lesson_4()
+    lesson_5()
