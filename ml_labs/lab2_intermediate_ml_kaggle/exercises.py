@@ -4,6 +4,7 @@ The Home Prices dataset can be downloaded from
 https://www.kaggle.com/c/home-data-for-ml-course/data
 """
 import os
+from pprint import pprint
 
 import ipdb
 import pandas as pd
@@ -11,6 +12,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 from ml_labs.utils.genutils import print_
 
@@ -188,6 +190,125 @@ def ex_2():
     output.to_csv('ex2_submission.csv', index=False)
 
 
+# Exercise 3: Categorical Variables
+def ex_3():
+    # -----
+    # Setup
+    # -----
+    # Read the data
+    X = pd.read_csv(train_file_path, index_col='Id')
+    X_test = pd.read_csv(test_file_path, index_col='Id')
+
+    # Remove rows with missing target, separate target from predictors
+    X.dropna(axis=0, subset=['SalePrice'], inplace=True)
+    y = X.SalePrice
+    X.drop(['SalePrice'], axis=1, inplace=True)
+
+    # To keep things simple, we'll drop columns with missing values
+    cols_with_missing = [col for col in X.columns if X[col].isnull().any()]
+    X.drop(cols_with_missing, axis=1, inplace=True)
+    X_test.drop(cols_with_missing, axis=1, inplace=True)
+
+    # Break off validation set from training data
+    X_train, X_valid, y_train, y_valid = train_test_split(X, y,
+                                                          train_size=0.8, test_size=0.2,
+                                                          random_state=0)
+
+    print_("First 5 rows from train set", 0)
+    print_(X_train.head())
+
+    # ------------------------------------------
+    # Step 1: Drop columns with categorical data
+    # ------------------------------------------
+    # The most straightforward approach
+    # Drop columns in training and validation data
+    drop_X_train = X_train.select_dtypes(exclude=['object'])
+    drop_X_valid = X_valid.select_dtypes(exclude=['object'])
+
+    print_("MAE from Approach 1 (Drop categorical variables):", 0)
+    print_(score_dataset(drop_X_train, drop_X_valid, y_train, y_valid))
+
+    print("Unique values in 'Condition2' column in training data:", X_train['Condition2'].unique())
+    print("\nUnique values in 'Condition2' column in validation data:", X_valid['Condition2'].unique())
+
+    # ----------------------
+    # Step 2: Label encoding
+    # ----------------------
+    # Part A
+    # All categorical columns
+    object_cols = [col for col in X_train.columns if X_train[col].dtype == "object"]
+
+    # Columns that can be safely label encoded
+    good_label_cols = [col for col in object_cols if
+                       set(X_train[col]) == set(X_valid[col])]
+
+    # Problematic columns that will be dropped from the dataset
+    bad_label_cols = list(set(object_cols) - set(good_label_cols))
+
+    print('\nCategorical columns that will be label encoded:', good_label_cols)
+    print('\nCategorical columns that will be dropped from the dataset:', bad_label_cols, end="\n\n")
+
+    # Part B
+    # Drop categorical columns that will not be encoded
+    label_X_train = X_train.drop(bad_label_cols, axis=1)
+    label_X_valid = X_valid.drop(bad_label_cols, axis=1)
+
+    # Apply label encoder to the good labeled columns
+    label_encoder = LabelEncoder()
+    for col in good_label_cols:
+        label_X_train[col] = label_encoder.fit_transform(X_train[col])
+        label_X_valid[col] = label_encoder.transform(X_valid[col])
+
+    print_("MAE from Approach 2 (Label Encoding):", 0)
+    print_(score_dataset(label_X_train, label_X_valid, y_train, y_valid))
+
+    # Get number of unique entries in each column with categorical data
+    object_nunique = list(map(lambda col: X_train[col].nunique(), object_cols))
+    d = dict(zip(object_cols, object_nunique))
+
+    # Print number of unique entries by column, in ascending order
+    print_("Number of unique entries by categorical column", 0)
+    pprint(sorted(d.items(), key=lambda x: x[1]))
+    print()
+
+    # ---------------------------------
+    # Step 3: Investigating cardinality
+    # ---------------------------------
+    # Part B
+    # Columns that will be one-hot encoded
+    low_cardinality_cols = [col for col in object_cols if X_train[col].nunique() < 10]
+
+    # Columns that will be dropped from the dataset
+    high_cardinality_cols = list(set(object_cols) - set(low_cardinality_cols))
+
+    print('Categorical columns that will be one-hot encoded:', low_cardinality_cols)
+    print('\nCategorical columns that will be dropped from the dataset:', high_cardinality_cols, end="\n\n")
+
+    # ------------------------
+    # Step 4: One-hot encoding
+    # ------------------------
+    # Apply one-hot encoder to each column with categorical data
+    OH_encoder = OneHotEncoder(handle_unknown='ignore', sparse=False)
+    OH_cols_train = pd.DataFrame(OH_encoder.fit_transform(X_train[low_cardinality_cols]))
+    OH_cols_valid = pd.DataFrame(OH_encoder.transform(X_valid[low_cardinality_cols]))
+
+    # One-hot encoding removed index; put it back
+    OH_cols_train.index = X_train.index
+    OH_cols_valid.index = X_valid.index
+
+    # Remove categorical columns (will replace with one-hot encoding)
+    num_X_train = X_train.drop(object_cols, axis=1)
+    num_X_valid = X_valid.drop(object_cols, axis=1)
+
+    # Add one-hot encoded columns to numerical features
+    OH_X_train = pd.concat([num_X_train, OH_cols_train], axis=1)
+    OH_X_valid = pd.concat([num_X_valid, OH_cols_valid], axis=1)
+
+    print_("MAE from Approach 3 (One-Hot Encoding):", 0)
+    print_(score_dataset(OH_X_train, OH_X_valid, y_train, y_valid))
+
+
 if __name__ == '__main__':
     # ex_1()
-    ex_2()
+    # ex_2()
+    ex_3()
