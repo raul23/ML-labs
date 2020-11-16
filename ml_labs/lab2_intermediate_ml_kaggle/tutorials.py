@@ -2,17 +2,20 @@
 
 The Melbourne Housing Snapshot dataset can be downloaded from
 https://www.kaggle.com/glovepm/melbourne-housing
+
+The AER-credit-card dataset can be downloaded from
+https://www.kaggle.com/keitazoumana/aercreditcard
 """
 import os
 
 import ipdb
 import pandas as pd
 from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.impute import SimpleImputer
 from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import cross_val_score, train_test_split
-from sklearn.pipeline import Pipeline
+from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from xgboost import XGBRegressor
 
@@ -20,6 +23,7 @@ from ml_labs.utils.genutils import print_
 from exercises import score_dataset
 
 melbourne_file_path = os.path.expanduser('~/Data/kaggle_datasets/melbourne_housing_snapshot/melb_data.csv')
+credit_card_file_path = os.path.expanduser('~/Data/kaggle_datasets/aer_credit_card_data/AER_credit_card_data.csv')
 
 
 # Measure Quality of Each Approach
@@ -138,6 +142,25 @@ def load_data_for_lesson_6():
     # Separate data into training and validation sets
     X_train, X_valid, y_train, y_valid = train_test_split(X, y)
     return X_train, X_valid, y_train, y_valid
+
+
+def load_data_from_ex_7():
+    # Read the data
+    data = pd.read_csv(credit_card_file_path,
+                       true_values=['yes'], false_values=['no'])
+
+    # Select target
+    y = data.card
+
+    # Select predictors
+    X = data.drop(['card'], axis=1)
+
+    print("Number of rows in the dataset:", X.shape[0])
+    print()
+    print_("First 5 rows from X", 0)
+    print_(X.head())
+
+    return X, y
 
 
 # Lesson 2: Missing values
@@ -388,9 +411,43 @@ def lesson_6():
     print("Mean Absolute Error: " + str(mean_absolute_error(predictions, y_valid)))
 
 
+# Lesson 7: Data Leakage
+def lesson_7():
+    X, y = load_data_from_ex_7()
+
+    # Since there is no preprocessing, we don't need a pipeline (used anyway as best practice!)
+    my_pipeline = make_pipeline(RandomForestClassifier(n_estimators=100))
+    cv_scores = cross_val_score(my_pipeline, X, y,
+                                cv=5,
+                                scoring='accuracy')
+
+    print("Cross-validation accuracy: %f" % cv_scores.mean())
+
+    expenditures_cardholders = X.expenditure[y]
+    expenditures_noncardholders = X.expenditure[~y]
+
+    print('\nFraction of those who did not receive a card and had no expenditures: %.2f' \
+          % ((expenditures_noncardholders == 0).mean()))
+    print('Fraction of those who received a card and had no expenditures: %.2f' \
+          % ((expenditures_cardholders == 0).mean()))
+
+    # We would run a model without target leakage as follows:
+    # Drop leaky predictors from dataset
+    potential_leaks = ['expenditure', 'share', 'active', 'majorcards']
+    X2 = X.drop(potential_leaks, axis=1)
+
+    # Evaluate the model with leaky predictors removed
+    cv_scores = cross_val_score(my_pipeline, X2, y,
+                                cv=5,
+                                scoring='accuracy')
+
+    print("\nCross-val accuracy: %f" % cv_scores.mean())
+
+
 if __name__ == '__main__':
     # lesson_2()
     # lesson_3()
     # lesson_4()
     # lesson_5()
-    lesson_6()
+    # lesson_6()
+    lesson_7()
