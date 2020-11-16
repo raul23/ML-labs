@@ -128,5 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# Submissions fles
-*submission.csv
+# Some CSV files generated from exercises or tutorials (e.g. submissions)
+*.csv
