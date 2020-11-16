@@ -337,7 +337,16 @@ def ex_3():
         return series.expanding(min_periods=2).sum() - series
 
 
+# Exercise 4: Feature Selection
+def ex_4():
+    print_("Exercise 4: Feature Selection", 0, 1)
+    # ----------------------------------------
+    # Which data to use for feature selection?
+    # ----------------------------------------
+
+
 if __name__ == '__main__':
     # ex_1()
     # ex_2()
     ex_3()
+    # ex_4()
