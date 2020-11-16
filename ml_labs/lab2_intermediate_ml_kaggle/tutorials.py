@@ -14,6 +14,7 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from xgboost import XGBRegressor
 
 from ml_labs.utils.genutils import print_
 from exercises import score_dataset
@@ -121,6 +122,22 @@ def load_data_for_lesson_5():
     # Select target
     y = data.Price
     return X, y
+
+
+def load_data_for_lesson_6():
+    # Read the data
+    data = pd.read_csv(melbourne_file_path)
+
+    # Select subset of predictors
+    cols_to_use = ['Rooms', 'Distance', 'Landsize', 'BuildingArea', 'YearBuilt']
+    X = data[cols_to_use]
+
+    # Select target
+    y = data.Price
+
+    # Separate data into training and validation sets
+    X_train, X_valid, y_train, y_valid = train_test_split(X, y)
+    return X_train, X_valid, y_train, y_valid
 
 
 # Lesson 2: Missing values
@@ -359,8 +376,21 @@ def lesson_5():
     print(scores.mean(), end="\n\n")
 
 
+# Lesson 6: XGBoost
+def lesson_6():
+    print_("LESSON 6: XGBoost", 0, 1)
+    X_train, X_valid, y_train, y_valid = load_data_for_lesson_6()
+
+    my_model = XGBRegressor()
+    my_model.fit(X_train, y_train)
+
+    predictions = my_model.predict(X_valid)
+    print("Mean Absolute Error: " + str(mean_absolute_error(predictions, y_valid)))
+
+
 if __name__ == '__main__':
     # lesson_2()
     # lesson_3()
     # lesson_4()
-    lesson_5()
+    # lesson_5()
+    lesson_6()
