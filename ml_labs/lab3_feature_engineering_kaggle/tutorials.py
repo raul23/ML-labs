@@ -8,7 +8,11 @@ import os
 import ipdb
 import category_encoders as ce
 import lightgbm as lgb
+import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
+from pandas.plotting import register_matplotlib_converters
+register_matplotlib_converters()
 from sklearn import metrics
 from sklearn.preprocessing import LabelEncoder
 
@@ -194,6 +198,122 @@ def lesson_2():
     print()
 
 
+# Lesson 3: Feature Generation
+def lesson_3():
+    print_("Lesson 3: Feature Generation", 0, 1)
+    # -----
+    # Setup
+    # -----
+    ks = pd.read_csv(ks_projects_file_path,
+                     parse_dates=['deadline', 'launched'])
+
+    # Drop live projects
+    ks = ks.query('state != "live"')
+
+    # Add outcome column, "successful" == 1, others are 0
+    ks = ks.assign(outcome=(ks['state'] == 'successful').astype(int))
+
+    # Timestamp features
+    ks = ks.assign(hour=ks.launched.dt.hour,
+                   day=ks.launched.dt.day,
+                   month=ks.launched.dt.month,
+                   year=ks.launched.dt.year)
+
+    # Label encoding
+    cat_features = ['category', 'currency', 'country']
+    encoder = LabelEncoder()
+    encoded = ks[cat_features].apply(encoder.fit_transform)
+
+    data_cols = ['goal', 'hour', 'day', 'month', 'year', 'outcome']
+    baseline_data = ks[data_cols].join(encoded)
+
+    # ------------
+    # Interactions
+    # ------------
+    interactions = ks['category'] + "_" + ks['country']
+    print_("Interactions: first 5 rows from category_country", 0)
+    print_(interactions.head(5))
+
+    # Label encode the interaction feature and add it to the data
+    label_enc = LabelEncoder()
+    data_interaction = baseline_data.assign(category_country=label_enc.fit_transform(interactions))
+    print_("First 5 rows from data with the added interactions", 0)
+    print_(data_interaction.head())
+
+    # -----------------------------------
+    # Number of projects in the last week
+    # -----------------------------------
+    # First, create a Series with a timestamp index
+    launched = pd.Series(ks.index, index=ks.launched, name="count_7_days").sort_index()
+    print_("First 20 rows from series with the timestamp index", 0)
+    print_(launched.head(20))
+
+    count_7_days = launched.rolling('7d').count() - 1
+    print_("First 20 rows from the rolling window of 7 days", 0)
+    print_(count_7_days.head(20))
+
+    # Ignore records with broken launch dates
+    plt.plot(count_7_days[7:])
+    plt.title("Number of projects launched over periods of 7 days")
+    plt.show()
+
+    # Adjust the index so we can join it with the other training data.
+    count_7_days.index = launched.values
+    count_7_days = count_7_days.reindex(ks.index)
+
+    print_("First 10 rows from the rolling window of 7 days (with index adjusted)", 0)
+    print_(count_7_days.head(10))
+
+    # Now join the new feature with the other data again using .join since
+    # we've matched the index.
+    print_("First 10 rows from baseline data with the new feature (count_7_days))")
+    print_(baseline_data.join(count_7_days).head(10))
+
+    # ------------------------------------------------
+    # Time since the last project in the same category
+    # ------------------------------------------------
+    def time_since_last_project(series):
+        # Return the time in hours
+        return series.diff().dt.total_seconds() / 3600.
+
+    df = ks[['category', 'launched']].sort_values('launched')
+    timedeltas = df.groupby('category').transform(time_since_last_project)
+    print_("First 20 rows from timedeltas (time since the last project in "
+           "the same category)", 0)
+    print_(timedeltas.head(20))
+    # We get NaNs here for projects that are the first in their category.
+
+    # Fix NaNs by using the mean or median. We'll also need to reset the index
+    # so we can join it with the other data.
+    # Final time since last project
+    timedeltas = timedeltas.fillna(timedeltas.median()).reindex(baseline_data.index)
+    print_("First 20 rows from timedeltas (with NaNs fixed)", 0)
+    print_(timedeltas.head(20))
+
+    # -------------------------------
+    # Transforming numerical features
+    # -------------------------------
+    # Some models work better when the features are normally distributed
+    # Transform them with the square root or natural logarithm.
+
+    # Example: transform the goal feature using the square root and log functions
+
+    # Square root transformation
+    plt.hist(np.sqrt(ks.goal), range=(0, 400), bins=50)
+    plt.title('Sqrt(Goal)')
+    plt.show()
+
+    # Log function transformation
+    plt.hist(np.log(ks.goal), range=(0, 25), bins=50)
+    plt.title('Log(Goal)')
+    plt.show()
+
+    # IMPORTANT: The log transformation won't help our model since tree-based
+    # models are scale invariant. However, this should help if we had a linear
+    # model or neural network.
+
+
 if __name__ == '__main__':
     # lesson_1()
-    lesson_2()
+    # lesson_2()
+    lesson_3()
