@@ -80,5 +80,11 @@ def lesson_1():
     print(f"Test AUC score: {score}")
 
 
+# Lesson 2: Categorical Encodings
+def lesson_2():
+    print_("Lesson 2: Categorical Encodings", 0, 1)
+
+
 if __name__ == '__main__':
-    lesson_1()
+    # lesson_1()
+    lesson_2()
