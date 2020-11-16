@@ -413,6 +413,7 @@ def lesson_6():
 
 # Lesson 7: Data Leakage
 def lesson_7():
+    print_("LESSON 7: Data Leakage", 0, 1)
     X, y = load_data_from_ex_7()
 
     # Since there is no preprocessing, we don't need a pipeline (used anyway as best practice!)
