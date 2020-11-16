@@ -616,3 +616,4 @@ if __name__ == '__main__':
     # ex_4()
     # ex_5()
     ex_6()
+    # ex_7(): no programming questions
