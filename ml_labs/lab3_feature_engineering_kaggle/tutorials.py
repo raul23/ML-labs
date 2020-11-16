@@ -5,6 +5,7 @@ https://www.kaggle.com/kemical/kickstarter-projects
 """
 import os
 
+import ipdb
 import category_encoders as ce
 import lightgbm as lgb
 import pandas as pd
@@ -149,6 +150,8 @@ def lesson_2():
     count_enc = ce.CountEncoder()
 
     # Transform the features, rename the columns with the _count suffix, and join to dataframe
+    # TODO: calculating the counts on the whole dataset? Should it be on the train only to avoid data leakage?
+    # This is what was done in the Exercise 2
     count_encoded = count_enc.fit_transform(ks[cat_features])
     data = data.join(count_encoded.add_suffix("_count"))
 
@@ -178,16 +181,16 @@ def lesson_2():
     # CatBoost Encoding
     # -----------------
     # Create the encoder
-    target_enc = ce.TargetEncoder(cols=cat_features)
-    target_enc.fit(train[cat_features], train['outcome'])
+    cb_enc = ce.TargetEncoder(cols=cat_features)
+    cb_enc.fit(train[cat_features], train['outcome'])
 
     # Transform the features, rename the columns with _target suffix, and join to dataframe
-    train_TE = train.join(target_enc.transform(train[cat_features]).add_suffix('_target'))
-    valid_TE = valid.join(target_enc.transform(valid[cat_features]).add_suffix('_target'))
+    train_CBE = train.join(cb_enc.transform(train[cat_features]).add_suffix('_cb'))
+    valid_CBE = valid.join(cb_enc.transform(valid[cat_features]).add_suffix('_cb'))
 
     # Train a model
     print_("LightGBM with CatBoost encoding", 0)
-    train_model(train_TE, valid_TE)
+    train_model(train_CBE, valid_CBE)
     print()
 
 
