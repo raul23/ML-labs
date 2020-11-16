@@ -1,6 +1,6 @@
 """Kaggle - Feature Engineering (Tutorials)
 
-Kickstarter Projects dataset can be downloaded from
+The Kickstarter Projects dataset can be downloaded from
 https://www.kaggle.com/kemical/kickstarter-projects
 """
 import os
