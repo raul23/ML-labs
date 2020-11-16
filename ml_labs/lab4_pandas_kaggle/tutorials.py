@@ -23,7 +23,8 @@ def lesson_1():
     print_("Simple DataFrame with integers", 0)
     print_(dt_int)
 
-    dt_str = pd.DataFrame({'Bob': ['I liked it.', 'It was awful.'], 'Sue': ['Pretty good.', 'Bland.']})
+    dt_str = pd.DataFrame({'Bob': ['I liked it.', 'It was awful.'],
+                           'Sue': ['Pretty good.', 'Bland.']})
     print_("Simple DataFrame with strings", 0)
     print_(dt_str)
 
@@ -39,7 +40,9 @@ def lesson_1():
     print_(s_list)
 
     # NOTE: a Series does not have a column name, it only has one overall name
-    s_index_name = pd.Series([30, 35, 40], index=['2015 Sales', '2016 Sales', '2017 Sales'], name='Product A')
+    s_index_name = pd.Series([30, 35, 40],
+                             index=['2015 Sales', '2016 Sales', '2017 Sales'],
+                             name='Product A')
     print_("Series with row labels and a name", 0)
     print_(s_index_name)
 
