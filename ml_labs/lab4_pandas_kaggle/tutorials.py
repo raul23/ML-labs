@@ -6,7 +6,9 @@ https://www.kaggle.com/zynicide/wine-reviews
 import os
 
 import ipdb
+import numpy as np
 import pandas as pd
+pd.set_option('max_rows', 5)
 
 from ml_labs.utils.genutils import print_
 
@@ -70,7 +72,6 @@ def lesson_1():
 def lesson_2():
     print_("Lesson 2: Indexing, Selecting & Assigning", 0, 1)
     reviews = pd.read_csv(wine_file_path, index_col=0)
-    pd.set_option('max_rows', 5)
 
     # ----------------
     # Native accessors
@@ -167,6 +168,84 @@ def lesson_2():
     print_(reviews['index_backwards'])
 
 
+# Exercise 3: Summary Functions and Maps
+def lesson_3():
+    print_("Lesson 3: Summary Functions and Maps", 0, 1)
+    reviews = pd.read_csv(wine_file_path, index_col=0)
+    print_("Reviews", 0)
+    print_(reviews)
+
+    # -----------------
+    # Summary functions
+    # -----------------
+    # Describe with numerical data
+    print_("Describe reviews.points (numerical data only)", 0)
+    print_(reviews.points.describe())
+
+    # Describe with string data
+    print_("Describe reviews.taster_name (string data)", 0)
+    print_(reviews.taster_name.describe())
+
+    # Statistic: mean
+    print_("Mean of reviews.points", 0)
+    print_(reviews.points.mean())
+
+    # Unique values
+    print_("Unique values from reviews.taster_name", 0)
+    print_(reviews.taster_name.unique())
+
+    # Unique values and how often they occur in the dataset
+    print_("Unique values and their counts from reviews.taster_name", 0)
+    print_(reviews.taster_name.value_counts())
+
+    # ----
+    # Maps
+    # ----
+    # Two important mapping methods: map() and apply()
+    # NOTE: they don't modify the original data they're called on
+
+    # map()
+    # Remean the scores the wines received to 0
+    review_points_mean = reviews.points.mean()
+    remeans = reviews.points.map(lambda p: p - review_points_mean)
+    print_("Remean the wine scores to 0 using map()", 0)
+    print_(remeans)
+
+    # apply()
+    # NOTE: apply() is way slower than map()
+    def remean_points(row):
+        row.points = row.points - review_points_mean
+        return row
+
+    # NOTE: if axis='index', we transform each column
+    # Commented because too slow
+    """
+    reviews_remeans = reviews.apply(remean_points, axis='columns')
+    print_("Remean the wine scores to 0 using apply()", 0)
+    print_(reviews_remeans.points)
+    """
+
+    # Faster way to remeaning the points column
+    review_points_mean = reviews.points.mean()
+    remeans = reviews.points - review_points_mean
+    print_("Remean the wine scores to 0 using .mean() [Faster]", 0)
+    print_(remeans)
+
+    # Combining columns
+    comb_cols = reviews.country + " - " + reviews.region_1
+    print_("Combining country and region info", 0)
+    print_(comb_cols)
+
+    # IMPORTANT:
+    # These operators (e.g. -, >) are faster than map() or apply()
+    # because they uses speed ups built into pandas
+    #
+    # Though map() or apply() are more flexible becausE they can do more
+    # advanced things, like applying conditional logic, which cannot be done
+    # with addition and subtraction alone.
+
+
 if __name__ == '__main__':
     # lesson_1()
-    lesson_2()
+    # lesson_2()
+    lesson_3()

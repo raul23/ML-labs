@@ -55,9 +55,9 @@ def ex_1():
 
 # Exercise 2: Indexing, Selecting & Assigning
 def ex_2():
+    pd.set_option("display.max_rows", 5)
     print_("Exercise 2: Indexing, Selecting & Assigning", 0, 1)
     reviews = pd.read_csv(wine_file_path, index_col=0)
-    pd.set_option("display.max_rows", 5)
 
     print_("First 5 rows from reviews", 0)
     print_(reviews.head())
