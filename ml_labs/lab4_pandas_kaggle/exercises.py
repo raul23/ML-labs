@@ -7,7 +7,8 @@ import pandas as pd
 
 from ml_labs.utils.genutils import print_
 
-wine_file_path = os.path.expanduser('~/Data/kaggle_datasets/wine_reviews/winemag-data_first150k.csv')
+wine_first150k_file_path = os.path.expanduser('~/Data/kaggle_datasets/wine_reviews/winemag-data_first150k.csv')
+wine_130k_file_path = os.path.expanduser('~/Data/kaggle_datasets/wine_reviews/winemag-data-130k-v2.csv')
 
 
 # Exercise 1: Creating, Reading and Writing
@@ -40,7 +41,7 @@ def ex_1():
     # ---------
     # Problem 4
     # ---------
-    reviews = pd.read_csv(wine_file_path, index_col=0)
+    reviews = pd.read_csv(wine_first150k_file_path, index_col=0)
     print_("Problem 4", 0)
     print_(reviews.head())
 
@@ -57,7 +58,7 @@ def ex_1():
 def ex_2():
     pd.set_option("display.max_rows", 5)
     print_("Exercise 2: Indexing, Selecting & Assigning", 0, 1)
-    reviews = pd.read_csv(wine_file_path, index_col=0)
+    reviews = pd.read_csv(wine_130k_file_path, index_col=0)
 
     print_("First 5 rows from reviews", 0)
     print_(reviews.head())
@@ -149,6 +150,118 @@ def ex_2():
     print_(top_oceania_wines)
 
 
+# Exercise 3: Summary Functions and Maps
+def ex_3():
+    pd.set_option("display.max_rows", 5)
+    print_("Exercise 3: Summary Functions and Maps", 0, 1)
+
+    reviews = pd.read_csv(wine_130k_file_path, index_col=0)
+    print_("First 5 rows from reviews", 0)
+    print_(reviews.head())
+
+    # ---------
+    # Problem 1
+    # ---------
+    # What is the median of the points column in the reviews DataFrame?
+    median_points = reviews.points.median()
+    print_("Problem 1", 0)
+    print_(median_points)
+
+    # ---------
+    # Problem 2
+    # ---------
+    # What countries are represented in the dataset? (Your answer should not
+    # include any duplicates.)
+    countries = reviews.country.unique()
+    print_("Problem 2", 0)
+    print_(countries)
+
+    # ---------
+    # Problem 3
+    # ---------
+    # How often does each country appear in the dataset? Create a Series
+    # reviews_per_country mapping countries to the count of reviews of wines
+    # from that country.
+    reviews_per_country = reviews.country.value_counts()
+    print_("Problem 3", 0)
+    print_(reviews_per_country)
+
+    # ---------
+    # Problem 4
+    # ---------
+    # Create variable centered_price containing a version of the price
+    # column with the mean price subtracted.
+    centered_price = reviews.price - reviews.price.mean()
+    print_("Problem 4", 0)
+    print_(centered_price)
+
+    # ---------
+    # Problem 5
+    # ---------
+    # I'm an economical wine buyer. Which wine is the "best bargain"? Create a
+    # variable bargain_wine with the title of the wine with the highest
+    # points-to-price ratio in the dataset.
+    ratio = reviews.points / reviews.price
+    index = ratio.argmax()
+    bargain_wine = reviews.loc[index].title
+    print_("Problem 5", 0)
+    print_(bargain_wine)
+
+    # ---------
+    # Problem 6
+    # ---------
+    # There are only so many words you can use when describing a bottle of wine.
+    # Is a wine more likely to be "tropical" or "fruity"? Create a Series
+    # descriptor_counts counting how many times each of these two words appears
+    # in the description column in the dataset.
+    word_counts = {'tropical': 0, 'fruity': 0}
+    for desc in reviews.description:
+        for word, count in word_counts.items():
+            # If you want to compute the number of occurrences of each word
+            # word_counts[word] += desc.count(word)
+            if desc.count(word):
+                word_counts[word] += 1
+
+    descriptor_counts = pd.Series(word_counts)
+    print_("Problem 6", 0)
+    print_(descriptor_counts)
+
+    # Other answer:
+    """
+    n_trop = reviews.description.map(lambda desc: "tropical" in desc).sum()
+    n_fruity = reviews.description.map(lambda desc: "fruity" in desc).sum()
+    descriptor_counts = pd.Series([n_trop, n_fruity], index=['tropical', 'fruity'])
+    """
+
+    # ---------
+    # Problem 7
+    # ---------
+    # A score of 95 or higher counts as 3 stars, a score of at least 85 but less
+    # than 95 is 2 stars. Any other score is 1 star.
+    #
+    # Also, the Canadian Vintners Association bought a lot of ads on the site,
+    # so any wines from Canada should automatically get 3 stars, regardless of
+    # points.
+    #
+    # Create a series star_ratings with the number of stars corresponding to
+    # each review in the dataset.
+    def convert_points(row):
+        if row.country == 'Canada':
+            row.points = 3
+        elif row.points >= 95:
+            row.points = 3
+        elif row.points >= 85:
+            row.points = 2
+        else:
+            row.points = 1
+        return row
+
+    star_ratings = reviews.apply(convert_points, axis='columns').points
+    print_("Problem 7", 0)
+    print_(star_ratings)
+
+
 if __name__ == '__main__':
     # ex_1()
-    ex_2()
+    # ex_2()
+    ex_3()
