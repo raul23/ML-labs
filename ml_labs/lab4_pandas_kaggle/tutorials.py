@@ -245,7 +245,75 @@ def lesson_3():
     # with addition and subtraction alone.
 
 
+# Lesson 4: Grouping and Sorting
+def lesson_4():
+    pd.set_option("display.max_rows", 5)
+    print_("Lesson 4: Grouping and Sorting", 0, 1)
+    reviews = pd.read_csv(wine_file_path, index_col=0)
+
+    # ------------------
+    # Groupwise analysis
+    # ------------------
+    print_("Count occurrences of each point using group_by()", 0)
+    print_(reviews.groupby('points').points.count())
+
+    # Equivalent to using value_counts()
+    print_("Count occurrences of each point using value_counts()", 0)
+    print_(reviews.points.value_counts().sort_index())
+
+    # Get the cheapest wine in each point value category
+    print_("Cheapest wine in each point value category", 0)
+    print_(reviews.groupby('points').price.min())
+
+    # Select the name of the first wine reviewed from each winery
+    print_("Select the name of the first wine reviewed from each winery using apply()", 0)
+    print_(reviews.groupby('winery').apply(lambda df: df.title.iloc[0]))
+
+    # You can also group by more than one column
+    # Example: pick out the best wine by country and province:
+    print_("Pick out the best wine by country and province", 0)
+    print_(reviews.groupby(['country', 'province']).apply(lambda df: df.loc[df.points.idxmax()]))
+
+    # agg(): lets you run a bunch of different functions on your DataFrame simultaneously
+    # Example: generate a simple statistical summary of the dataset by country
+    print_("Statistical summary by country", 0)
+    print_(reviews.groupby(['country']).price.agg([len, min, max]))
+
+    # -------------
+    # Multi-indexes
+    # -------------
+    # vs single-level (regular) indices
+    # More info about multi-indexes at https://pandas.pydata.org/pandas-docs/stable/advanced.html
+    countries_reviewed = reviews.groupby(['country', 'province']).description.agg([len])
+    print_("Multi-index: country and province", 0)
+    print_(countries_reviewed)
+
+    # reset_index(): important multi-index method that converts back to a
+    # regular index
+    print_("reset_index(): get back to the original single index", 0)
+    print_(countries_reviewed.reset_index())
+
+    # -------
+    # Sorting
+    # -------
+    countries_reviewed = countries_reviewed.reset_index()
+    print_("Sort by 'len' (ascending)", 0)
+    print_(countries_reviewed.sort_values(by='len'))
+
+    print_("Sort by 'len' (descending)", 0)
+    print_(countries_reviewed.sort_values(by='len', ascending=False))
+
+    # Sort by index values
+    print_("Sort by index values", 0)
+    print_(countries_reviewed.sort_index())
+
+    # Sort by more than one column at a time
+    print_("Sort by 2 columns: country and len", 0)
+    countries_reviewed.sort_values(by=['country', 'len'])
+
+
 if __name__ == '__main__':
     # lesson_1()
     # lesson_2()
-    lesson_3()
+    # lesson_3()
+    lesson_4()
