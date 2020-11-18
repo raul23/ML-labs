@@ -361,6 +361,60 @@ def lesson_5():
 def lesson_6():
     # pd.set_option('max_rows', 5)
     print_("Lesson 6: Renaming and Combining", 0, 1)
+    reviews = pd.read_csv(wine_file_path, index_col=0)
+
+    # --------
+    # Renaming
+    # --------
+    # rename(): lets you change index names and/or column names
+
+    # Change column
+    # Change the points column in our dataset to score
+    print_("Change the points column to score", 0)
+    print_(reviews.rename(columns={'points': 'score'}))
+
+    # Change indexes
+    print_("Rename some elements of the index", 0)
+    print_(reviews.rename(index={0: 'firstEntry', 1: 'secondEntry'}))
+
+    # IMPORTANT: set_index() is usually more convenient than using rename()
+    # to change indexes
+
+    # rename_axis(): change the names for the row index and the column index
+    print_("Change the row index to wines and the column index to fields", 0)
+    print_(reviews.rename_axis("wines", axis='rows').rename_axis("fields", axis='columns'))
+
+    # ---------
+    # Combining
+    # ---------
+    # Three core methods for combining DataFrames and Series (start less complex)
+    # - concat()
+    # - join()
+    # - merge()
+    #
+    # NOTE: what merge() can do, join() can do it more simply
+
+    # concat(): smush a given list of elements together along an axis
+    #
+    # Smush two datasets
+    # Ref.: https://www.kaggle.com/datasnaek/youtube-new
+    canadian_youtube = pd.read_csv(os.path.expanduser("~/Data/kaggle_datasets/trending_youtube/CAvideos.csv"))
+    british_youtube = pd.read_csv(os.path.expanduser("~/Data/kaggle_datasets/trending_youtube/GBvideos.csv"))
+
+    print_("Concat two datasets", 0)
+    print_(pd.concat([canadian_youtube, british_youtube]))
+
+    # join(): lets you combine different DataFrame objects which have an index
+    # in common
+    #
+    # Pull down videos that happened to be trending on the same day in both
+    # Canada and the UK
+    print_("videos that happened to be trending on the same day in both Canada "
+           "and the UK", 0)
+    left = canadian_youtube.set_index(['title', 'trending_date'])
+    right = british_youtube.set_index(['title', 'trending_date'])
+
+    print_(left.join(right, lsuffix='_CAN', rsuffix='_UK'))
 
 
 if __name__ == '__main__':
@@ -368,5 +422,5 @@ if __name__ == '__main__':
     # lesson_2()
     # lesson_3()
     # lesson_4()
-    lesson_5()
-    # lesson_6()
+    # lesson_5()
+    lesson_6()
