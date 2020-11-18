@@ -312,8 +312,61 @@ def lesson_4():
     countries_reviewed.sort_values(by=['country', 'len'])
 
 
+# Lesson 5: Data Types and Missing Values
+def lesson_5():
+    # pd.set_option('max_rows', 5)
+    print_("Lesson 5: Data Types and Missing Values", 0, 1)
+    reviews = pd.read_csv(wine_file_path, index_col=0)
+
+    # ------
+    # DTypes
+    # ------
+    # column.dtype
+    print_("dtype of the price column", 0)
+    print_(reviews.price.dtype)
+
+    # DataFrame.dtypes: dtypes of every column
+    print_("dtypes of every column", 0)
+    print_(reviews.dtypes)
+
+    # object type: for strings
+
+    # astype(): converts a column of one type into another
+    print_("Convert points from int64 t float64", 0)
+    print_(reviews.points.astype('float64'))
+
+    # ------------
+    # Missing data
+    # ------------
+    # NaN values are always of the float64 dtype
+
+    # Select NaN entries
+    print_("Select NaN entries for country", 0)
+    print_(reviews[pd.isnull(reviews.country)])
+
+    # Replace missing values with fillna()
+    print_("Replace missing values with Unknown", 0)
+    print_(reviews.region_2.fillna("Unknown"))
+
+    # Backfill strategy for filling missing values: fill each missing value
+    # with the first non-null value that appears sometime after the given
+    # record in the database.
+
+    # Replace a non-null value: replace()
+    print_("Replace @kerinokeefe to @kerino", 0)
+    print_(reviews.taster_twitter_handle.replace("@kerinokeefe", "@kerino"))
+
+
+# Lesson 6: Renaming and Combining
+def lesson_6():
+    # pd.set_option('max_rows', 5)
+    print_("Lesson 6: Renaming and Combining", 0, 1)
+
+
 if __name__ == '__main__':
     # lesson_1()
     # lesson_2()
     # lesson_3()
-    lesson_4()
+    # lesson_4()
+    lesson_5()
+    # lesson_6()
