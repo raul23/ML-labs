@@ -13,8 +13,9 @@ import seaborn as sns
 from ml_labs.utils.genutils import print_
 
 fifa_filepath = os.path.expanduser('~/Data/kaggle_datasets/fifa_kaggle_course/fifa.csv')
-spotify_filepath = os.path.expanduser('~/Data/kaggle_datasets/spotify_kaggle_course/spotify.csv')
 flight_filepath = os.path.expanduser('~/Data/kaggle_datasets/flight_delays_kaggle_course/flight_delays.csv')
+insurance_filepath = os.path.expanduser('~/Data/kaggle_datasets/insurance_kaggle_course/insurance.csv')
+spotify_filepath = os.path.expanduser('~/Data/kaggle_datasets/spotify_kaggle_course/spotify.csv')
 
 
 # Lesson 1: Hello, Seaborn
@@ -159,14 +160,55 @@ def lesson_3():
 
     plt.show()
 
-    ipdb.set_trace()
+
+# Lesson 4: Scatter Plots
+def lesson_4():
+    print_("Lesson 4: Scatter Plots", 0, 1)
+
+    # -------------------------
+    # Load and examine the data
+    # -------------------------
+    insurance_data = pd.read_csv(insurance_filepath)
+    print_("First 5 rows", 0)
+    print_(insurance_data.head())
+
+    # -------------
+    # Scatter plots
+    # -------------
+    sns.scatterplot(x=insurance_data['bmi'], y=insurance_data['charges'])
+    plt.show()
+
+    # Draw a line that best fits the data
+    sns.regplot(x=insurance_data['bmi'], y=insurance_data['charges'])
+    plt.show()
+
+    # -------------------------
+    # Color-coded scatter plots
+    # -------------------------
+    # Use color-coded scatter plots to display the relationships between 3
+    # variables
+    sns.scatterplot(x=insurance_data['bmi'], y=insurance_data['charges'], hue=insurance_data['smoker'])
+    plt.show()
+
+    # sns.lmplot: adds two regression lines
+    sns.lmplot(x="bmi", y="charges", hue="smoker", data=insurance_data)
+    plt.show()
+
+    # ------------------------
+    # Categorical scatter plot
+    # ------------------------
+    # We use this sort of scatter plot to highlight the relationship between a
+    # continuous and categorical variables
+    sns.swarmplot(x=insurance_data['smoker'],
+                  y=insurance_data['charges'])
+    plt.show()
 
 
 if __name__ == '__main__':
     # lesson_1()
     # lesson_2()
-    lesson_3()
-    # lesson_4()
+    # lesson_3()
+    lesson_4()
     # lesson_5()
     # lesson_6()
     # lesson_7()
