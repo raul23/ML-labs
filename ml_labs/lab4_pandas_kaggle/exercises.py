@@ -339,8 +339,94 @@ def ex_4():
     print_(country_variety_counts)
 
 
+# Exercise 5: Data Types and Missing Values
+def ex_5():
+    print_("Exercise 5: Data Types and Missing Values", 0, 1)
+    reviews = pd.read_csv(wine_130k_file_path, index_col=0)
+
+    # ---------
+    # Problem 1
+    # ---------
+    # What is the data type of the points column in the dataset?
+    print_("Problem 1", 0)
+    dtype = reviews.points.dtype
+    print_(dtype)
+
+    # ---------
+    # Problem 2
+    # ---------
+    # Create a Series from entries in the points column, but convert the
+    # entries to strings. Hint: strings are str in native Python.
+    print_("Problem 2", 0)
+    point_strings = reviews.points.astype('str')
+    print_(point_strings)
+
+    # ---------
+    # Problem 3
+    # ---------
+    # Sometimes the price column is null. How many reviews in the dataset are
+    # missing a price?
+    print_("Problem 3", 0)
+    n_missing_prices = reviews.price.isnull().sum()
+    print_(n_missing_prices)
+
+    # Other answers:
+    # -  len(reviews[reviews.price.isnull()])
+    # - pd.isnull(reviews.price).sum()
+
+    # ---------
+    # Problem 4
+    # ---------
+    # What are the most common wine-producing regions? Create a Series counting
+    # the number of times each value occurs in the region_1 field. This field
+    # is often missing data, so replace missing values with Unknown. Sort in
+    # descending order. Your output should look something like this:
+    """
+    Unknown                    21247
+    Napa Valley                 4480
+                               ...  
+    Bardolino Superiore            1
+    Primitivo del Tarantino        1
+    Name: region_1, Length: 1230, dtype: int64
+    """
+    print_("Problem 4", 0)
+    # Ref.: https://stackoverflow.com/a/50270796 (for grouping a Series without lambda)
+    reviews_per_region = reviews.region_1.fillna('Unknown').to_frame(0).groupby(0)[0].size().sort_values(ascending=False)
+    print_(reviews_per_region)
+    # Better solution:
+    # reviews.region_1.fillna('Unknown').value_counts().sort_values(ascending=False)
+    # Thus, value_counts() <=> to_frame(0).groupby(0)[0].size()
+
+
+# Exercise 6: Renaming and Combining
+def ex_6():
+    print_("Exercise 6: Renaming and Combining", 0, 1)
+
+    # ---------
+    # Problem 1
+    # ---------
+    print_("Problem 1", 0)
+
+    # ---------
+    # Problem 2
+    # ---------
+    print_("Problem 2", 0)
+
+    # ---------
+    # Problem 3
+    # ---------
+    print_("Problem 3", 0)
+
+    # ---------
+    # Problem 4
+    # ---------
+    print_("Problem 4", 0)
+
+
 if __name__ == '__main__':
     # ex_1()
     # ex_2()
     # ex_3()
-    ex_4()
+    # ex_4()
+    ex_5()
+    # ex_6()
