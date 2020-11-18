@@ -1,10 +1,6 @@
 """Kaggle - Data Visualization (Tutorials)
 
-Datasets used for the tutorials:
-- The FIFA dataset
-- The Spotify dataset
-
-They can all be downloaded from the course's notebook.
+The datasets can all be downloaded from the course's notebook.
 """
 import os
 
@@ -17,7 +13,7 @@ import seaborn as sns
 from ml_labs.utils.genutils import print_
 
 fifa_filepath = os.path.expanduser('~/Data/kaggle_datasets/fifa_kaggle_course/fifa.csv')
-spotify_filepath = os.path.expanduser('~/Data/kaggle_datasets/spotify_kaggle/spotify.csv')
+spotify_filepath = os.path.expanduser('~/Data/kaggle_datasets/spotify_kaggle_course/spotify.csv')
 
 
 # Lesson 1: Hello, Seaborn
@@ -69,8 +65,39 @@ def lesson_2():
     # -------------
     # Plot the data
     # -------------
+    # Set the width and height of the figure
+    plt.figure(figsize=(14, 6))
+
+    # Add title
+    plt.title("Daily Global Streams of Popular Songs in 2017-2018")
+
     # Line chart showing daily global streams of each song
     sns.lineplot(data=spotify_data)
+
+    plt.show()
+
+    # -------------------------
+    # Plot a subset of the data
+    # -------------------------
+    # List of columns
+    print_("Columns from the dataset", 0)
+    print_(list(spotify_data.columns))
+
+    # Set the width and height of the figure
+    plt.figure(figsize=(14, 6))
+
+    # Add title
+    plt.title("Daily Global Streams of Popular Songs in 2017-2018")
+
+    # Line chart showing daily global streams of 'Shape of You'
+    sns.lineplot(data=spotify_data['Shape of You'], label="Shape of You")
+
+    # Line chart showing daily global streams of 'Despacito'
+    sns.lineplot(data=spotify_data['Despacito'], label="Despacito")
+
+    # Add label for horizontal axis
+    plt.xlabel("Date")
+
     plt.show()
 
 
