@@ -1,4 +1,7 @@
 """Kaggle - Pandas (Exercises)
+
+The Wine Reviews dataset can be downloaded from
+https://www.kaggle.com/zynicide/wine-reviews
 """
 import os
 
