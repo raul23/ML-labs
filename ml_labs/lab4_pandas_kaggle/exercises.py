@@ -401,26 +401,66 @@ def ex_5():
 # Exercise 6: Renaming and Combining
 def ex_6():
     print_("Exercise 6: Renaming and Combining", 0, 1)
+    reviews = pd.read_csv(wine_130k_file_path, index_col=0)
+
+    print_("First 5 rows", 0)
+    print_(reviews.head())
 
     # ---------
     # Problem 1
     # ---------
+    # region_1 and region_2 are pretty uninformative names for locale columns
+    # in the dataset. Create a copy of reviews with these columns renamed to
+    # region and locale, respectively.
     print_("Problem 1", 0)
+    renamed = reviews.rename(columns={'region_1': 'region', 'region_2': 'locale'})
+    print_(renamed)
 
     # ---------
     # Problem 2
     # ---------
+    # Set the index name in the dataset to wines.
     print_("Problem 2", 0)
+    reindexed = reviews.rename_axis("wines", axis='rows')
+    print_(reindexed)
 
     # ---------
     # Problem 3
     # ---------
+    # The Things on Reddit dataset includes product links from a selection of
+    # top-ranked forums ("subreddits") on reddit.com. Run the cell below to
+    # load a dataframe of products mentioned on the /r/gaming subreddit and
+    # another dataframe for products mentioned on the r//movies subreddit.
+    # Ref.: https://www.kaggle.com/residentmario/things-on-reddit/data
     print_("Problem 3", 0)
+    gaming_products = pd.read_csv(os.path.expanduser("~/Data/kaggle_datasets/things_on_reddit/top-things/top-things/reddits/g/gaming.csv"))
+    gaming_products['subreddit'] = "r/gaming"
+    movie_products = pd.read_csv(os.path.expanduser("~/Data/kaggle_datasets/things_on_reddit/top-things/top-things/reddits/m/movies.csv"))
+    movie_products['subreddit'] = "r/movies"
+
+    # Create a DataFrame of products mentioned on either subreddit.
+    combined_products = pd.concat([gaming_products, movie_products])
+    print_(combined_products)
 
     # ---------
     # Problem 4
     # ---------
+    # The Powerlifting Database dataset on Kaggle includes one CSV table for
+    # powerlifting meets and a separate one for powerlifting competitors. Run
+    # the cell below to load these datasets into dataframes:
+    # NOTE: version 2 of the dataset doesn't include meets.csv (it is now interated with openpowerlifting.csv)
+    """
+    powerlifting_meets = pd.read_csv(os.path.expanduser("~/Data/kaggle_datasets/powerlifting_database/meets.csv"))
+    powerlifting_competitors = pd.read_csv(os.path.expanduser("~/Data/kaggle_datasets/powerlifting_database/openpowerlifting.csv"))
+    """
     print_("Problem 4", 0)
+    # Both tables include references to a MeetID, a unique key for each meet
+    # (competition) included in the database. Using this, generate a dataset
+    # combining the two tables into one.
+    """
+    powerlifting_combined = powerlifting_meets.set_index('MeetID').join(powerlifting_competitors.set_index('MeetID'))
+    print_(powerlifting_combined)
+    """
 
 
 if __name__ == '__main__':
@@ -428,5 +468,5 @@ if __name__ == '__main__':
     # ex_2()
     # ex_3()
     # ex_4()
-    ex_5()
-    # ex_6()
+    # ex_5()
+    ex_6()
