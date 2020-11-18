@@ -12,6 +12,8 @@ import seaborn as sns
 
 from ml_labs.utils.genutils import print_
 
+cancer_b_filepath = os.path.expanduser('~/Data/kaggle_datasets/cancer_kaggle_course/cancer_b.csv')
+cancer_m_filepath = os.path.expanduser('~/Data/kaggle_datasets/cancer_kaggle_course/cancer_m.csv')
 candy_filepath = os.path.expanduser('~/Data/kaggle_datasets/candy_kaggle_course/candy.csv')
 fifa_filepath = os.path.expanduser('~/Data/kaggle_datasets/fifa_kaggle_course/fifa.csv')
 ign_filepath = os.path.expanduser('~/Data/kaggle_datasets/ign_scores_kaggle_course/ign_scores.csv')
@@ -227,12 +229,63 @@ def ex_4():
     plt.show()
 
 
+# Exercise 5: Distributions
+def ex_5():
+    print_("Exercise 5: Distributions", 0, 1)
+
+    # ---------------------
+    # Step 1: Load the data
+    # ---------------------
+    # Fill in the line below to read the (benign) file
+    cancer_b_data = pd.read_csv(cancer_b_filepath, index_col="Id")
+
+    # Fill in the line below to read the (malignant) file
+    cancer_m_data = pd.read_csv(cancer_m_filepath, index_col="Id")
+
+    # -----------------------
+    # Step 2: Review the data
+    # -----------------------
+    # Print the first five rows of the (benign) data
+    print_("First 5 rows of the benign data", 0)
+    print_(cancer_b_data.head())
+
+    # Print the first five rows of the (malignant) data
+    print_("First 5 rows of the malignant data", 0)
+    print_(cancer_m_data.head())
+
+    # ---------------------------------
+    # Step 3: Investigating differences
+    # ---------------------------------
+    # Part A
+    # Histograms for benign and maligant tumors
+    sns.distplot(a=cancer_b_data['Area (mean)'], label="Benign tumors", kde=False)
+    sns.distplot(a=cancer_m_data['Area (mean)'], label="Malignant tumors", kde=False)
+    plt.legend()
+    plt.show()
+
+    # ----------------------------
+    # Step 4: A very useful column
+    # ----------------------------
+    # Part A
+    # KDE plots for benign and malignant tumors
+    sns.kdeplot(data=cancer_b_data['Radius (worst)'], label="Benign Tumors", shade=True)
+    sns.kdeplot(data=cancer_m_data['Radius (worst)'], label="Malignant tumors", shade=True)
+
+    # Add title
+    plt.title("Distribution in values for 'Radius (worst)', for both benign and malignant tumors")
+
+    # Force legend to appear
+    plt.legend()
+
+    plt.show()
+
+
 if __name__ == '__main__':
     # ex_1()
     # ex_2()
     # ex_3()
-    ex_4()
-    # ex_5()
+    # ex_4()
+    ex_5()
     # ex_6()
     # ex_7()
     # ex_8()
