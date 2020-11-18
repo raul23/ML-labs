@@ -15,6 +15,10 @@ from ml_labs.utils.genutils import print_
 fifa_filepath = os.path.expanduser('~/Data/kaggle_datasets/fifa_kaggle_course/fifa.csv')
 flight_filepath = os.path.expanduser('~/Data/kaggle_datasets/flight_delays_kaggle_course/flight_delays.csv')
 insurance_filepath = os.path.expanduser('~/Data/kaggle_datasets/insurance_kaggle_course/insurance.csv')
+iris_filepath = os.path.expanduser('~/Data/kaggle_datasets/iris_kaggle_course/iris.csv')
+iris_set_filepath = "~/Data/kaggle_datasets/iris_kaggle_course/iris_setosa.csv"
+iris_ver_filepath = "~/Data/kaggle_datasets/iris_kaggle_course/iris_versicolor.csv"
+iris_vir_filepath = "~/Data/kaggle_datasets/iris_kaggle_course/iris_virginica.csv"
 spotify_filepath = os.path.expanduser('~/Data/kaggle_datasets/spotify_kaggle_course/spotify.csv')
 
 
@@ -204,12 +208,86 @@ def lesson_4():
     plt.show()
 
 
+# Lesson 5: Distributions
+def lesson_5():
+    print_("Lesson 5: Distributions", 0, 1)
+    iris_data = pd.read_csv(iris_filepath, index_col="Id")
+
+    # Print the first 5 rows of the data
+    print_("First 5 rows", 0)
+    print_(iris_data.head())
+
+    # ----------
+    # Histograms
+    # ----------
+    # Create a histogram to see how petal length varies in iris flowers
+    # NOTE: kde=False is something we'll always provide when creating a
+    # histogram, as leaving it out will create a slightly different plot.
+    sns.distplot(a=iris_data['Petal Length (cm)'], kde=False)
+    plt.show()
+
+    # -------------
+    # Density plots
+    # -------------
+    # kernel density estimate (KDE) plot: a kind of smoothed histogram
+    # KDE plot
+    # NOTE: shade=True colors the area below the curve
+    sns.kdeplot(data=iris_data['Petal Length (cm)'], shade=True)
+    plt.show()
+
+    # ------------
+    # 2D KDE plots
+    # ------------
+    # 2D KDE plot
+    # darker parts of the figure are more likely
+    sns.jointplot(x=iris_data['Petal Length (cm)'],
+                  y=iris_data['Sepal Width (cm)'], kind="kde")
+    plt.show()
+
+    # -----------------
+    # Color-coded plots
+    # -----------------
+    iris_set_data = pd.read_csv(iris_set_filepath, index_col="Id")
+    iris_ver_data = pd.read_csv(iris_ver_filepath, index_col="Id")
+    iris_vir_data = pd.read_csv(iris_vir_filepath, index_col="Id")
+
+    # Print the first 5 rows of the Iris versicolor data
+    print_("First 5 rows of the Iris versicolor data", 0)
+    print_(iris_ver_data.head())
+
+    # Histograms for each species
+    sns.distplot(a=iris_set_data['Petal Length (cm)'], label="Iris-setosa", kde=False)
+    sns.distplot(a=iris_ver_data['Petal Length (cm)'], label="Iris-versicolor", kde=False)
+    sns.distplot(a=iris_vir_data['Petal Length (cm)'], label="Iris-virginica", kde=False)
+
+    # Add title
+    plt.title("Histogram of Petal Lengths, by Species")
+
+    # Force legend to appear
+    plt.legend()
+
+    plt.show()
+
+    # KDE plots for each species
+    sns.kdeplot(data=iris_set_data['Petal Length (cm)'], label="Iris-setosa", shade=True)
+    sns.kdeplot(data=iris_ver_data['Petal Length (cm)'], label="Iris-versicolor", shade=True)
+    sns.kdeplot(data=iris_vir_data['Petal Length (cm)'], label="Iris-virginica", shade=True)
+
+    # Add title
+    plt.title("Distribution of Petal Lengths, by Species")
+
+    # Force legend to appear
+    plt.legend()
+
+    plt.show()
+
+
 if __name__ == '__main__':
     # lesson_1()
     # lesson_2()
     # lesson_3()
-    lesson_4()
-    # lesson_5()
+    # lesson_4()
+    lesson_5()
     # lesson_6()
     # lesson_7()
     # lesson_8()
