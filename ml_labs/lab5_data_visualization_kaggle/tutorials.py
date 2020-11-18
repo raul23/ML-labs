@@ -282,12 +282,35 @@ def lesson_5():
     plt.show()
 
 
+# Lesson 6: Choosing Plot Types and Custom Styles
+def lesson_6():
+    print_("Lesson 6: Choosing Plot Types and Custom Styles", 0, 1)
+
+    spotify_data = pd.read_csv(spotify_filepath, index_col="Date", parse_dates=True)
+
+    # Line chart
+    plt.figure(figsize=(12, 6))
+    sns.lineplot(data=spotify_data)
+    plt.show()
+
+    # Seaborn has five different themes: (1)"darkgrid", (2)"whitegrid",
+    # (3)"dark", (4)"white", and (5)"ticks"
+
+    # Change the style of the figure to the "dark" theme
+    sns.set_style("dark")
+
+    # Line chart
+    plt.figure(figsize=(12, 6))
+    sns.lineplot(data=spotify_data)
+    plt.show()
+
+
 if __name__ == '__main__':
     # lesson_1()
     # lesson_2()
     # lesson_3()
     # lesson_4()
-    lesson_5()
-    # lesson_6()
+    # lesson_5()
+    lesson_6()
     # lesson_7()
     # lesson_8()
