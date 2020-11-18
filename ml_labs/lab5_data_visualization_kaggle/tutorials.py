@@ -14,6 +14,7 @@ from ml_labs.utils.genutils import print_
 
 fifa_filepath = os.path.expanduser('~/Data/kaggle_datasets/fifa_kaggle_course/fifa.csv')
 spotify_filepath = os.path.expanduser('~/Data/kaggle_datasets/spotify_kaggle_course/spotify.csv')
+flight_filepath = os.path.expanduser('~/Data/kaggle_datasets/flight_delays_kaggle_course/flight_delays.csv')
 
 
 # Lesson 1: Hello, Seaborn
@@ -101,10 +102,70 @@ def lesson_2():
     plt.show()
 
 
+# Lesson 3: Bar Charts and Heatmaps
+def lesson_3():
+    print_("Lesson 3: Bar Charts and Heatmaps", 0, 1)
+
+    # -------------
+    # Load the data
+    # -------------
+    flight_data = pd.read_csv(flight_filepath, index_col="Month")
+
+    # ----------------
+    # Examine the data
+    # ----------------
+    print_("The whole data", 0)
+    print_(flight_data)
+
+    # ---------
+    # Bar chart
+    # ---------
+    # Set the width and height of the figure
+    plt.figure(figsize=(10, 6))
+
+    # Add title
+    plt.title("Average Arrival Delay for Spirit Airlines Flights, by Month")
+
+    # Bar chart showing average arrival delay for Spirit Airlines flights by month
+    sns.barplot(x=flight_data.index, y=flight_data['NK'])
+
+    # Add label for vertical axis
+    plt.ylabel("Arrival delay (in minutes)")
+
+    plt.show()
+
+    # Important: You must select the indexing column with flight_data.index,
+    # and it is not possible to use flight_data['Month'] (which will return an
+    # error). This is because when we loaded the dataset, the "Month" column
+    # was used to index the rows. We always have to use this special notation
+    # to select the indexing column.
+
+    # -------
+    # Heatmap
+    # -------
+    # Set the width and height of the figure
+    plt.figure(figsize=(14, 7))
+
+    # Add title
+    plt.title("Average Arrival Delay for Each Airline, by Month")
+
+    # Heatmap showing average arrival delay for each airline by month
+    # NOTE: annot=True - This ensures that the values for each cell appear on
+    # the chart. (Leaving this out removes the numbers from each of the cells!)
+    sns.heatmap(data=flight_data, annot=True)
+
+    # Add label for horizontal axis
+    plt.xlabel("Airline")
+
+    plt.show()
+
+    ipdb.set_trace()
+
+
 if __name__ == '__main__':
     # lesson_1()
-    lesson_2()
-    # lesson_3()
+    # lesson_2()
+    lesson_3()
     # lesson_4()
     # lesson_5()
     # lesson_6()
