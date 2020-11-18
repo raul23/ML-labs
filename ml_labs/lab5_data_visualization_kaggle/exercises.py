@@ -12,9 +12,10 @@ import seaborn as sns
 
 from ml_labs.utils.genutils import print_
 
+candy_filepath = os.path.expanduser('~/Data/kaggle_datasets/candy_kaggle_course/candy.csv')
 fifa_filepath = os.path.expanduser('~/Data/kaggle_datasets/fifa_kaggle_course/fifa.csv')
-museum_filepath = os.path.expanduser('~/Data/kaggle_datasets/museum_visitors_kaggle_course/museum_visitors.csv')
 ign_filepath = os.path.expanduser('~/Data/kaggle_datasets/ign_scores_kaggle_course/ign_scores.csv')
+museum_filepath = os.path.expanduser('~/Data/kaggle_datasets/museum_visitors_kaggle_course/museum_visitors.csv')
 
 
 # Exercise 1: Hello, Seaborn
@@ -165,11 +166,72 @@ def ex_3():
     plt.show()
 
 
+# Exercise 4: Scatter Plots
+def ex_4():
+    print_("Exercise 4: Scatter Plots", 0, 1)
+
+    # ---------------------
+    # Step 1: Load the Data
+    # ---------------------
+    candy_data = pd.read_csv(candy_filepath, index_col="id")
+
+    # -----------------------
+    # Step 2: Review the data
+    # -----------------------
+    # Print the first five rows of the data
+    print_("Frist 5 rows", 0)
+    print_(candy_data.head())
+
+    # -------------------------
+    # Step 3: The role of sugar
+    # -------------------------
+    # Part A
+    # # Scatter plot showing the relationship between 'sugarpercent' and
+    # 'winpercent'
+    sns.scatterplot(x=candy_data['sugarpercent'], y=candy_data['winpercent'])
+    plt.show()
+
+    # --------------------------
+    # Step 4: Take a closer look
+    # --------------------------
+    # Part A
+    # Scatter plot w/ regression line showing the relationship between
+    # 'sugarpercent' and 'winpercent'
+    sns.regplot(x=candy_data['sugarpercent'], y=candy_data['winpercent'])
+    plt.show()
+
+    # ------------------
+    # Step 5: Chocolate!
+    # ------------------
+    # # Scatter plot showing the relationship between 'pricepercent',
+    # 'winpercent', and 'chocolate'
+    sns.scatterplot(x=candy_data['pricepercent'], y=candy_data['winpercent'],
+                    hue=candy_data['chocolate'])
+    plt.show()
+
+    # -----------------------------
+    # Step 6: Investigate chocolate
+    # -----------------------------
+    # Part A
+    # Color-coded scatter plot w/ regression lines
+    sns.lmplot(x="pricepercent", y="winpercent", hue="chocolate", data=candy_data)
+    plt.show()
+
+    # ----------------------------------
+    # Step 7: Everybody loves chocolate.
+    # ----------------------------------
+    # Part A
+    # Scatter plot showing the relationship between 'chocolate' and 'winpercent'
+    sns.swarmplot(x=candy_data['chocolate'],
+                  y=candy_data['winpercent'])
+    plt.show()
+
+
 if __name__ == '__main__':
     # ex_1()
     # ex_2()
-    ex_3()
-    # ex_4()
+    # ex_3()
+    ex_4()
     # ex_5()
     # ex_6()
     # ex_7()
