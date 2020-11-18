@@ -18,6 +18,7 @@ candy_filepath = os.path.expanduser('~/Data/kaggle_datasets/candy_kaggle_course/
 fifa_filepath = os.path.expanduser('~/Data/kaggle_datasets/fifa_kaggle_course/fifa.csv')
 ign_filepath = os.path.expanduser('~/Data/kaggle_datasets/ign_scores_kaggle_course/ign_scores.csv')
 museum_filepath = os.path.expanduser('~/Data/kaggle_datasets/museum_visitors_kaggle_course/museum_visitors.csv')
+spotify_filepath = os.path.expanduser('~/Data/kaggle_datasets/spotify_kaggle_course/spotify.csv')
 
 
 # Exercise 1: Hello, Seaborn
@@ -280,12 +281,31 @@ def ex_5():
     plt.show()
 
 
+# Exercise 6: Choosing Plot Types and Custom Styles
+def ex_6():
+    print_("Exercise 6: Choosing Plot Types and Custom Styles", 0, 1)
+
+    spotify_data = pd.read_csv(spotify_filepath, index_col="Date", parse_dates=True)
+
+    # ----------------------
+    # Try out seaborn styles
+    # ----------------------
+    # Change the style of the figure
+    sns.set_style("white")
+
+    # Line chart
+    plt.figure(figsize=(12, 6))
+    sns.lineplot(data=spotify_data)
+
+    plt.show()
+
+
 if __name__ == '__main__':
     # ex_1()
     # ex_2()
     # ex_3()
     # ex_4()
-    ex_5()
-    # ex_6()
+    # ex_5()
+    ex_6()
     # ex_7()
     # ex_8()
