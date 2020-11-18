@@ -1,4 +1,10 @@
 """Kaggle - Data Visualization (Exercises)
+
+Datasets used for the tutorials:
+- The FIFA dataset
+-
+
+They can all be downloaded from the course's notebook.
 """
 import os
 
