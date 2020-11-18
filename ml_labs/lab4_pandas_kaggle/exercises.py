@@ -261,7 +261,86 @@ def ex_3():
     print_(star_ratings)
 
 
+# Exercise 4: Grouping and Sorting
+def ex_4():
+    print_("Exercise 4: Grouping and Sorting", 0, 1)
+    reviews = pd.read_csv(wine_130k_file_path, index_col=0)
+
+    # ---------
+    # Problem 1
+    # ---------
+    # Who are the most common wine reviewers in the dataset? Create a Series
+    # whose index is the taster_twitter_handle category from the dataset, and
+    # whose values count how many reviews each person wrote.
+    print_("Problem 1", 0)
+    reviews_written = reviews.groupby(['taster_twitter_handle']).description.agg([len]).iloc[:, 0]
+    print_(reviews_written)
+
+    # Other answers:
+    # - reviews_written = reviews.groupby('taster_twitter_handle').size()
+    # - reviews_written = reviews.groupby('taster_twitter_handle').taster_twitter_handle.count()
+
+    # ---------
+    # Problem 2
+    # ---------
+    # What is the best wine I can buy for a given amount of money? Create a
+    # Series whose index is wine prices and whose values is the maximum number
+    # of points a wine costing that much was given in a review. Sort the values
+    # by price, ascending (so that 4.0 dollars is at the top and 3300.0 dollars
+    # is at the bottom).
+    # best_rating_per_price = reviews.groupby('price').points.agg([max]).iloc[:, 0]
+    print_("Problem 2", 0)
+    best_rating_per_price = reviews.groupby('price').points.max()
+    print_(best_rating_per_price)
+
+    # ---------
+    # Problem 3
+    # ---------
+    # What are the minimum and maximum prices for each variety of wine? Create a
+    # DataFrame whose index is the variety category from the dataset and whose
+    # values are the min and max values thereof.
+    print_("Problem 3", 0)
+    price_extremes = reviews.groupby('variety').price.agg([min, max])
+    print_(price_extremes)
+
+    # ---------
+    # Problem 4
+    # ---------
+    # What are the most expensive wine varieties? Create a variable
+    # sorted_varieties containing a copy of the dataframe from the previous
+    # question where varieties are sorted in descending order based on minimum
+    # price, then on maximum price (to break ties).
+    print_("Problem 4", 0)
+    sorted_varieties = price_extremes.sort_values(by=['min', 'max'], ascending=False)
+    print_(sorted_varieties)
+
+    # ---------
+    # Problem 5
+    # ---------
+    # Create a Series whose index is reviewers and whose values is the average
+    # review score given out by that reviewer. Hint: you will need the
+    # taster_name and points columns.
+    print_("Problem 5", 0)
+    reviewer_mean_ratings = reviews.groupby('taster_name').points.mean()
+    print_(reviewer_mean_ratings)
+
+    # ---------
+    # Problem 6
+    # ---------
+    # What combination of countries and varieties are most common? Create a
+    # Series whose index is a MultiIndexof {country, variety} pairs. For
+    # example, a pinot noir produced in the US should map to
+    # {"US", "Pinot Noir"}. Sort the values in the Series in descending order
+    # based on wine count.
+    # My answer was not accepted but ...
+    # country_variety_counts = reviews.groupby(['country', 'variety']).variety.agg([len]).sort_values('len', ascending=False).iloc[:, 0]
+    print_("Problem 6", 0)
+    country_variety_counts = reviews.groupby(['country', 'variety']).variety.size().sort_values(0, ascending=False)
+    print_(country_variety_counts)
+
+
 if __name__ == '__main__':
     # ex_1()
     # ex_2()
-    ex_3()
+    # ex_3()
+    ex_4()
